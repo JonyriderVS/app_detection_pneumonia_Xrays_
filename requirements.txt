@@ -2,3 +2,4 @@ streamlit==1.36.0
 tensorflow==2.17.0
 numpy==1.24.4
 wget==3.2.0
+stqdm==24.0
