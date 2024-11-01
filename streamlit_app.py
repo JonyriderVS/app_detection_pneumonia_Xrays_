@@ -12,8 +12,19 @@ import wget
 import zipfile
 import os
 import contextlib
+from time import sleep
+from stqdm import stqdm
 
+st.image("PNEUMONIA.jpg", caption="Prediccion de presencia de neumonia.")
 st.write(f"TensorFlow version: {tf.__version__}")
+txt = st.text_area(
+    "Acerca de este proyecto...",
+    "La neumonía es una infección que afecta a uno o ambos pulmones, provocando que los alvéolos se llenen de líquido o pus. "
+    "Para diagnosticar la neumonía, un médico puede realizar un examen físico, revisar los antecedentes médicos "
+    "y solicitar estudios de diagnóstico, como una radiografía de tórax.  "
+    "El proposito de este proyecto es brindar una herramienta de soporte para combatir esta enfermedad."
+    " A medida que se explora un poco más el uso de CNN. ",height=150
+)
 # Descargar y descomprimir el modelo si no existe
 def download_and_extract_model():
     model_url = 'https://dl.dropboxusercontent.com/s/sdqx2xu119uqacd12f5u3/Xception_model.zip?rlkey=9qap8uwhag1f8nmo87y51ypaa&st=shs6bi0n'
@@ -38,7 +49,10 @@ def download_and_extract_model():
     
     return os.path.join(extract_folder, 'Xception_model.keras')
 
+st.caption("Una vez que se carguen los pesos del modelo proceda a subir la imagen, la prediccion empezará automáticamente.")
 modelo_path = download_and_extract_model()
+
+
 
 # Verificar si el archivo del modelo existe
 if not modelo_path or not os.path.exists(modelo_path):
@@ -67,11 +81,17 @@ try:
     st.success("Pesos del modelo cargados correctamente.")
 except Exception as e:
     st.error(f"Error al cargar los pesos del modelo: {e}")
-
 # Verificación de carga de archivo
-uploaded_file = st.file_uploader("Elige una imagen...", type=["jpg", "jpeg", "png"], label_visibility="hidden")
+uploaded_file = st.file_uploader("Elija y suba la radiografia...", type=["jpg", "jpeg", "png"], accept_multiple_files=False)
+
+
 
 if uploaded_file is not None and model is not None:
+    progress_bar = stqdm(range(50))
+    for _ in progress_bar:
+        sleep(0.1)
+    
+
     # Mostrar la imagen subida
     st.image(uploaded_file, width=300, caption="Imagen cargada")
 
@@ -79,6 +99,8 @@ if uploaded_file is not None and model is not None:
     img = image.load_img(uploaded_file, target_size=(224, 224))
     img_array = image.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0) / 255.0
+
+   
 
     # Realizar la predicción con redirección de salida para evitar UnicodeEncodeError
     with open(os.devnull, 'w') as devnull:
